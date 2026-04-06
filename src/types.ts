@@ -62,6 +62,11 @@ export interface JobMatchAnalysis {
   missingResponsibilities: string[];
   feedback: string;
   actionableChanges: string[];
+  exactChanges: {
+    section: string;
+    change: string;
+    reason: string;
+  }[];
 }
 
 export interface AnalysisResult {

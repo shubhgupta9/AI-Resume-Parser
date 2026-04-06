@@ -14,16 +14,18 @@ import { FileUpload } from './components/FileUpload';
 import { ScoreCard } from './components/ScoreCard';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { extractTextFromPDF } from './lib/pdf';
-import { parseResume, analyzeJobMatch, translateToEnglish, generateCoverLetter } from './lib/gemini';
+import { parseResume, analyzeJobMatch, translateToEnglish, generateCoverLetter, optimizeResume } from './lib/gemini';
 import { AnalysisResult } from './types';
-import { Loader2, Search, Sparkles, FileText, Target, Briefcase, AlertCircle, Languages, FileSignature } from 'lucide-react';
+import { Loader2, Search, Sparkles, FileText, Target, Briefcase, AlertCircle, Languages, FileSignature, Wand2 } from 'lucide-react';
 import { cn } from './lib/utils';
+import { generateResumePDF } from './lib/pdf-generator';
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingCL, setIsGeneratingCL] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -93,6 +95,28 @@ export default function App() {
     } finally {
       setIsGeneratingCL(false);
     }
+  };
+
+  const handleOptimizeResume = async () => {
+    if (!result || !jobDescription.trim()) return;
+    
+    setIsOptimizing(true);
+    setError(null);
+    
+    try {
+      const optimized = await optimizeResume(result.parsedResume, jobDescription);
+      setResult(prev => prev ? { ...prev, optimizedResume: optimized } : null);
+    } catch (err: any) {
+      console.error(err);
+      setError("Failed to optimize resume. Please try again.");
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
+  const handleDownloadPDF = (resume: any) => {
+    if (!resume) return;
+    generateResumePDF(resume);
   };
 
   const handleClear = () => {
@@ -343,7 +367,10 @@ export default function App() {
                 <AnalysisDisplay 
                   data={result} 
                   onGenerateCoverLetter={handleGenerateCoverLetter}
+                  onOptimizeResume={handleOptimizeResume}
+                  onDownloadPDF={handleDownloadPDF}
                   isGeneratingCL={isGeneratingCL}
+                  isOptimizing={isOptimizing}
                   hasJD={!!jobDescription.trim()}
                 />
               )}

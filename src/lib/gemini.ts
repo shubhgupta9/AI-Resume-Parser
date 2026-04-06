@@ -110,8 +110,20 @@ const jobMatchSchema = {
     missingResponsibilities: { type: Type.ARRAY, items: { type: Type.STRING } },
     feedback: { type: Type.STRING },
     actionableChanges: { type: Type.ARRAY, items: { type: Type.STRING } },
+    exactChanges: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          section: { type: Type.STRING, description: "The section of the resume (e.g., Skills, Experience, Projects)" },
+          change: { type: Type.STRING, description: "The exact text to add or modify" },
+          reason: { type: Type.STRING, description: "Why this change is needed for a 100% match" }
+        },
+        required: ["section", "change", "reason"]
+      }
+    }
   },
-  required: ["matchScore", "chancesOfCall", "missingTechnicalSkills", "missingSoftSkills", "missingResponsibilities", "feedback", "actionableChanges"],
+  required: ["matchScore", "chancesOfCall", "missingTechnicalSkills", "missingSoftSkills", "missingResponsibilities", "feedback", "actionableChanges", "exactChanges"],
 };
 
 export async function parseResume(resumeText: string): Promise<{ parsedResume: ParsedResume; atsAnalysis: ATSAnalysis }> {

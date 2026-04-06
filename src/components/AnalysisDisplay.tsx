@@ -154,6 +154,34 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ data, onGenera
             <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-3">Overall Feedback</h4>
             <p className="text-slate-600 leading-relaxed">{jobMatch.feedback}</p>
           </div>
+
+          {/* Exact Changes Section */}
+          <div className="mt-8 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                <Lightbulb className="w-4 h-4 text-blue-600" />
+              </div>
+              <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest">Exact Changes for 100% Match</h4>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
+              {jobMatch.exactChanges.map((item, i) => (
+                <div key={i} className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 rounded-lg bg-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      {item.section}
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100/50 font-mono text-sm text-blue-900 whitespace-pre-wrap">
+                    {item.change}
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    <span className="font-bold text-slate-700">Reason:</span> {item.reason}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
         </motion.div>
       )}
 
