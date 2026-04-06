@@ -139,6 +139,21 @@ export async function parseResume(resumeText: string): Promise<{ parsedResume: P
   return { parsedResume, atsAnalysis };
 }
 
+export async function translateToEnglish(text: string): Promise<string> {
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: `
+      Translate the following text to English. If it's already in English, return it as is.
+      Maintain the original formatting and structure.
+      
+      Text:
+      ${text}
+    `,
+  });
+
+  return response.text || text;
+}
+
 export async function analyzeJobMatch(parsedResume: ParsedResume, jobDescription: string): Promise<JobMatchAnalysis> {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

@@ -14,15 +14,16 @@ import { FileUpload } from './components/FileUpload';
 import { ScoreCard } from './components/ScoreCard';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { extractTextFromPDF } from './lib/pdf';
-import { parseResume, analyzeJobMatch } from './lib/gemini';
+import { parseResume, analyzeJobMatch, translateToEnglish } from './lib/gemini';
 import { AnalysisResult } from './types';
-import { Loader2, Search, Sparkles, FileText, Target, Briefcase, AlertCircle } from 'lucide-react';
+import { Loader2, Search, Sparkles, FileText, Target, Briefcase, AlertCircle, Languages } from 'lucide-react';
 import { cn } from './lib/utils';
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'results'>('upload');
@@ -56,6 +57,23 @@ export default function App() {
       setError(err.message || "An error occurred during analysis. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleTranslate = async () => {
+    if (!jobDescription.trim()) return;
+    
+    setIsTranslating(true);
+    setError(null);
+    
+    try {
+      const translated = await translateToEnglish(jobDescription);
+      setJobDescription(translated);
+    } catch (err: any) {
+      console.error(err);
+      setError("Translation failed. Please try again.");
+    } finally {
+      setIsTranslating(false);
     }
   };
 
@@ -147,11 +165,28 @@ export default function App() {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                        <Briefcase className="w-4 h-4 text-emerald-600" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                          <Briefcase className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <h2 className="text-lg font-black uppercase tracking-widest text-slate-400">Step 2: Job Details (Optional)</h2>
                       </div>
-                      <h2 className="text-lg font-black uppercase tracking-widest text-slate-400">Step 2: Job Details (Optional)</h2>
+                      
+                      {jobDescription.trim() && (
+                        <button
+                          onClick={handleTranslate}
+                          disabled={isTranslating}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider transition-all duration-300 disabled:opacity-50"
+                        >
+                          {isTranslating ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Languages className="w-3 h-3" />
+                          )}
+                          Translate to English
+                        </button>
+                      )}
                     </div>
                     <div className="relative group">
                       <textarea
