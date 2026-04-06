@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ParsedResume, ATSAnalysis, JobMatchAnalysis } from '../types';
-import { CheckCircle2, AlertCircle, Info, User, Briefcase, GraduationCap, Code, FolderGit2, ArrowRight, Lightbulb, Target } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Info, User, Briefcase, GraduationCap, Code, FolderGit2, ArrowRight, Lightbulb, Target, FileSignature, Loader2, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface AnalysisDisplayProps {
@@ -9,10 +9,14 @@ interface AnalysisDisplayProps {
     parsedResume: ParsedResume;
     atsAnalysis: ATSAnalysis;
     jobMatch?: JobMatchAnalysis;
+    coverLetter?: string;
   };
+  onGenerateCoverLetter?: () => void;
+  isGeneratingCL?: boolean;
+  hasJD?: boolean;
 }
 
-export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ data }) => {
+export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ data, onGenerateCoverLetter, isGeneratingCL, hasJD }) => {
   const { parsedResume, atsAnalysis, jobMatch } = data;
 
   const SectionHeader = ({ icon: Icon, title, color = "blue" }: { icon: any, title: string, color?: string }) => (
@@ -149,6 +153,70 @@ export const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ data }) => {
           <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
             <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-3">Overall Feedback</h4>
             <p className="text-slate-600 leading-relaxed">{jobMatch.feedback}</p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Cover Letter Section */}
+      {!data.coverLetter && hasJD && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm"
+        >
+          <SectionHeader icon={FileSignature} title="Step 3: Cover Letter (Optional)" color="indigo" />
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-8 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+            <div className="space-y-1">
+              <h4 className="font-black text-slate-900 tracking-tight">Generate a Tailored Cover Letter</h4>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                Our AI will analyze your resume and the job description to write a professional cover letter optimized for this specific role.
+              </p>
+            </div>
+            <button
+              onClick={onGenerateCoverLetter}
+              disabled={isGeneratingCL}
+              className={cn(
+                "px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all duration-300 flex items-center gap-2 flex-shrink-0 shadow-lg",
+                isGeneratingCL 
+                  ? "bg-slate-200 text-slate-400 cursor-not-allowed" 
+                  : "bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 shadow-indigo-100"
+              )}
+            >
+              {isGeneratingCL ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Generate Now
+                </>
+              )}
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {data.coverLetter && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm"
+        >
+          <SectionHeader icon={FileSignature} title="Tailored Cover Letter" color="indigo" />
+          <div className="p-8 bg-slate-50 rounded-2xl border border-slate-100 font-serif text-slate-800 leading-relaxed whitespace-pre-wrap">
+            {data.coverLetter}
+          </div>
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(data.coverLetter || "");
+              }}
+              className="px-6 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+            >
+              Copy to Clipboard
+            </button>
           </div>
         </motion.div>
       )}

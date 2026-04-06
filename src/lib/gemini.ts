@@ -154,6 +154,27 @@ export async function translateToEnglish(text: string): Promise<string> {
   return response.text || text;
 }
 
+export async function generateCoverLetter(parsedResume: ParsedResume, jobDescription: string): Promise<string> {
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: `
+      Generate a professional and compelling cover letter for the following candidate applying for the job described below.
+      The cover letter should be tailored to the specific requirements and responsibilities of the role.
+      It should highlight the candidate's relevant skills, experience, and projects that match the job description.
+      The tone should be professional, enthusiastic, and suitable for the German job market (even if written in English).
+      Use a standard cover letter format with placeholders for contact information if not available.
+
+      Candidate Resume Data:
+      ${JSON.stringify(parsedResume, null, 2)}
+      
+      Job Description:
+      ${jobDescription}
+    `,
+  });
+
+  return response.text || "Could not generate cover letter.";
+}
+
 export async function analyzeJobMatch(parsedResume: ParsedResume, jobDescription: string): Promise<JobMatchAnalysis> {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

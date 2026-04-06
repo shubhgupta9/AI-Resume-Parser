@@ -14,15 +14,16 @@ import { FileUpload } from './components/FileUpload';
 import { ScoreCard } from './components/ScoreCard';
 import { AnalysisDisplay } from './components/AnalysisDisplay';
 import { extractTextFromPDF } from './lib/pdf';
-import { parseResume, analyzeJobMatch, translateToEnglish } from './lib/gemini';
+import { parseResume, analyzeJobMatch, translateToEnglish, generateCoverLetter } from './lib/gemini';
 import { AnalysisResult } from './types';
-import { Loader2, Search, Sparkles, FileText, Target, Briefcase, AlertCircle, Languages } from 'lucide-react';
+import { Loader2, Search, Sparkles, FileText, Target, Briefcase, AlertCircle, Languages, FileSignature } from 'lucide-react';
 import { cn } from './lib/utils';
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingCL, setIsGeneratingCL] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -74,6 +75,23 @@ export default function App() {
       setError("Translation failed. Please try again.");
     } finally {
       setIsTranslating(false);
+    }
+  };
+
+  const handleGenerateCoverLetter = async () => {
+    if (!result || !jobDescription.trim()) return;
+    
+    setIsGeneratingCL(true);
+    setError(null);
+    
+    try {
+      const cl = await generateCoverLetter(result.parsedResume, jobDescription);
+      setResult(prev => prev ? { ...prev, coverLetter: cl } : null);
+    } catch (err: any) {
+      console.error(err);
+      setError("Failed to generate cover letter. Please try again.");
+    } finally {
+      setIsGeneratingCL(false);
     }
   };
 
@@ -321,7 +339,14 @@ export default function App() {
                 />
               </div>
 
-              {result && <AnalysisDisplay data={result} />}
+              {result && (
+                <AnalysisDisplay 
+                  data={result} 
+                  onGenerateCoverLetter={handleGenerateCoverLetter}
+                  isGeneratingCL={isGeneratingCL}
+                  hasJD={!!jobDescription.trim()}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>

@@ -68,4 +68,5 @@ export interface AnalysisResult {
   parsedResume: ParsedResume;
   atsAnalysis: ATSAnalysis;
   jobMatch?: JobMatchAnalysis;
+  coverLetter?: string;
 }
