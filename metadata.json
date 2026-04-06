@@ -1,0 +1,5 @@
+{
+  "name": "ATS Resume Master",
+  "description": "A professional ATS resume parsing and scoring tool optimized for the German job market. Upload your resume and match it against job descriptions to get actionable feedback.",
+  "requestFramePermissions": []
+}
